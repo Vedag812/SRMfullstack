@@ -8,6 +8,18 @@ import java.util.List;
  * It mixes account state, validation, persistence, notification,
  * statement formatting, and interest calculation all in one place.
  * Refactor this across by implementing the lab tasks onward.
+ *
+ * SECTION 1 (Warm-up): Distinct reasons this class might change
+ * 1) Deposit/withdrawal business rules change (minimum balance, validations, status checks).
+ * 2) Notification mechanism changes (email provider/template/SMS migration).
+ * 3) Database/persistence strategy changes (schema, DB vendor, repository implementation).
+ * 4) Statement format/output target changes (console, PDF, API response format).
+ * 5) Interest policy changes (new account types/rates/formula changes).
+ * 6) Security requirements change (PIN policy/verification behavior).
+ *
+ * SECTION 1 (Warm-up): One-line BankAccount job description (if only account ops)
+ * "BankAccount should maintain account state and perform safe account operations
+ *  like deposit, withdraw, and balance tracking."
  */
 public class BankAccount {
 
