@@ -16,10 +16,12 @@ public class SavingsAccount extends AbstractAccount {
         this.interestRate = interestRate;
     }
 
-    // TODO: Step 3.1 - Savings debit rule (add @Override once processDebit is declared abstract in AbstractAccount):
-    //   1. If (balance - amount) < minBalance -> throw new MinimumBalanceViolationException("Cannot breach minimum balance of Rs " + minBalance)
-    //   2. Otherwise subtract amount from balance.
+    @Override
     public void processDebit(double amount) throws AccountException {
+        if ((this.balance - amount) < this.minBalance) {
+            throw new MinimumBalanceViolationException("Cannot breach minimum balance of Rs " + minBalance);
+        }
+        this.balance -= amount;
     }
 
     public void applyInterest() {

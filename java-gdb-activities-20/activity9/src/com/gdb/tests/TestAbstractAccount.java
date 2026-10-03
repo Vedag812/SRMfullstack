@@ -5,7 +5,7 @@ import com.gdb.exceptions.*;
 
 public class TestAbstractAccount {
     public static void main(String[] args) {
-        System.out.println("=== Activity 9: Abstract Account & Template Pattern ===");
+        System.out.println("Activity 9: Abstract Account & Template Pattern ");
 
         AbstractAccount sa = new SavingsAccount("SAV1001", "Rajesh Sharma", 28, 10000.0, "ACTIVE", "1234", 1000.0, 4.0);
         try {
