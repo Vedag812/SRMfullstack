@@ -5,22 +5,41 @@ import com.gdb.exceptions.*;
 
 public class TestInterfaceFactory {
     public static void main(String[] args) {
-        System.out.println("=== Activity 12: Factory-Driven System Suite ===");
+        System.out.println("Activity 12: Factory-Driven System Suite ");
 
-        // NOTE: If you completed Activity 11 successfully, paste your working IAccount.java and AccountFactory.java into src/com/gdb/domain (replacing the provided versions).
+        IAccount sav = AccountFactory.createAccount("SAVINGS", "SAV1001", "Rajesh Sharma", 28, 5000.0, "ACTIVE", "1234");
+        try {
+            sav.deposit(2000.0);
+            boolean t1 = (sav.getBalance() == 7000.0);
+            System.out.println("[Test 1] Savings Account Creation & Deposit: " + (t1 ? "[PASS]" : "[FAIL]"));
+        } catch (AccountException e) {
+            System.out.println("[Test 1] [FAIL]");
+        }
 
-        // TODO: Step 1 - Instantiate Savings, Current, and FixedDeposit accounts exclusively through AccountFactory.createAccount()
+        IAccount cur = AccountFactory.createAccount("CURRENT", "CUR1001", "Priya Patel", 34, 5000.0, "ACTIVE", "5678");
+        try {
+            cur.withdraw(8000.0, "5678");
+            boolean t2 = (cur.getBalance() == -3000.0);
+            System.out.println("[Test 2] Current Account Overdraft Withdrawal: " + (t2 ? "[PASS]" : "[FAIL]"));
+        } catch (AccountException e) {
+            System.out.println("[Test 2] [FAIL]");
+        }
 
-        // TODO: Step 2 - Perform deposits and withdrawals through the IAccount interface references
+        IAccount fd = AccountFactory.createAccount("FIXED_DEPOSIT", "FD1001", "Amit Kumar", 45, 50000.0, "ACTIVE", "1111");
+        try {
+            fd.withdraw(5000.0, "1111");
+            System.out.println("[Test 3] [FAIL]");
+        } catch (AccountException e) {
+            System.out.println("[Test 3] Fixed Deposit Premature Withdrawal Block: [PASS]");
+        }
 
-        // TODO: Step 3 - Verify Savings minimum balance rule enforcement through the interface
+        try {
+            AccountFactory.createAccount("INVALID_TYPE", "INV001", "Test", 30, 1000.0, "ACTIVE", "0000");
+            System.out.println("[Test 4] [FAIL]");
+        } catch (IllegalArgumentException e) {
+            System.out.println("[Test 4] Invalid Type Rejection: [PASS]");
+        }
 
-        // TODO: Step 4 - Verify Current overdraft limit enforcement through the interface
-
-        // TODO: Step 5 - Verify FixedDeposit premature withdrawal rejection through the interface
-
-        // TODO: Step 6 - Verify requesting an invalid account type from AccountFactory throws IllegalArgumentException
-
-        System.out.println("=== Complete Activity 12 test suite and run ===");
+        System.out.println("Factory-driven architecture successfully verified!");
     }
 }

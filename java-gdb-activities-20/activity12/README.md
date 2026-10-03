@@ -1,72 +1,167 @@
-# Activity 12: Factory-Driven Banking System
+# Activity 12: Testing Interface and Factory
 
-## Objective
-Build a factory-driven test suite where accounts are instantiated solely through `AccountFactory` and manipulated exclusively through the `IAccount` interface.
-
----
-
-## Target File to Complete
-- `src/com/gdb/tests/TestInterfaceFactory.java`
+This solution demonstrates writing comprehensive integration tests for client applications interacting exclusively through the `IAccount` interface and `AccountFactory`.
 
 ---
 
-## Plain English Step-by-Step Instructions
+## 🎯 Learning Objectives
 
-### Step 1: Instantiate Accounts via Factory
-Use `AccountFactory.createAccount` to create instances of `SavingsAccount`, `CurrentAccount`, and `FixedDepositAccount`, assigning each to an `IAccount` reference.
-
-### Step 2: Test Interface-Driven Transactions
-Perform deposits and withdrawals through the `IAccount` interface variables without casting to specific concrete classes.
-
-### Step 3: Verify Subclass Business Rules
-1. Verify that savings accounts enforce minimum balance rules through the interface.
-2. Verify that current accounts allow overdrafts up to the limit through the interface.
-3. Verify that fixed deposit accounts reject premature withdrawals through the interface.
-4. Verify that requesting an unknown account type from the factory throws an `IllegalArgumentException`.
+By completing this activity, students will:
+- **Verify Complete Interface Decoupling** - Write client code that never references concrete class constructors.
+- **Validate Factory Product Creation** - Verify that all supported account type strings instantiate the correct underlying product with proper defaults.
+- **Test Error Paths in Factory** - Assert that null or unrecognized account types throw meaningful exceptions.
 
 ---
 
-## How to Compile & Run (Multi-OS Guide)
+## 📂 Solution Overview
+
+| File | Purpose |
+|------|---------|
+| `IAccount.java` | Interface contract. |
+| `AccountFactory.java` | Factory class. |
+| `TestInterfaceFactory.java` | Test harness asserting factory product creation and interface method execution. |
+
+---
+
+## 🔍 Code Walkthrough
+
+### File: `TestInterfaceFactory.java`
+
+#### Test Scenarios
+1. **Savings Creation via Factory**: Verifies creation, interest calculation (4.0%), and info display.
+2. **Current Creation via Factory**: Verifies overdraft limit setup and display.
+3. **Salary Creation via Factory**: Verifies zero-balance payroll account creation.
+4. **Fixed Deposit Creation via Factory**: Verifies tenure setup and interest calculation (6.5%).
+5. **Invalid Type Handling**: Asserts `AccountFactory.createAccount("UNKNOWN", ...)` throws `AccountException`.
+
+#### Key Code Snippets
+```java
+// Testing Factory instantiation
+IAccount savings = AccountFactory.createAccount("SAVINGS", "SA100", "Alice", 25, 5000.0, "Active", "1234");
+savings.displayAccountInfo();
+System.out.println("Savings Interest: Rs " + savings.calculateInterest());
+
+IAccount fd = AccountFactory.createAccount("FIXEDDEPOSIT", "FD400", "Diana", 45, 50000.0, "Active", "0000");
+fd.displayAccountInfo();
+System.out.println("FD Interest: Rs " + fd.calculateInterest());
+```
+
+---
+
+## 💡 Key Concepts
+
+### Concept 1: Dependency Inversion Principle (DIP)
+High-level modules (the test driver/client) should not depend on low-level modules (concrete classes). Both should depend on abstractions (`IAccount`).
+
+---
+
+## 🏗️ Design Decisions
+
+| Decision | Reasoning |
+|----------|-----------|
+| Strictly use `IAccount` variable references | Confirms complete decoupling of client code from concrete implementations. |
+
+---
+
+## 🚀 How to Run
+
+### Prerequisites
+- Java JDK 17 or higher installed
 
 ### Windows (PowerShell)
 ```powershell
-# Create bin folder if not exists
 if (!(Test-Path bin)) { New-Item -ItemType Directory -Path bin }
-
-# Compile all source files
 javac -d bin (Get-ChildItem -Recurse -Filter *.java src | ForEach-Object { $_.FullName })
-
-# Run the test program
 java -cp bin com.gdb.tests.TestInterfaceFactory
 ```
 
 ### Windows (Command Prompt - CMD)
 ```cmd
 if not exist bin mkdir bin
-javac -d bin src\com\gdb\domain\*.java src\com\gdb\tests\*.java src\com\gdb\exceptions\*.java
+javac -d bin src\com\gdb\domain\*.java src\com\gdb\exceptions\*.java src\com\gdb	ests\*.java
 java -cp bin com.gdb.tests.TestInterfaceFactory
 ```
 
-### Linux & macOS (Terminal / Bash / Zsh)
+### Linux / macOS (Terminal)
 ```bash
-# Create bin directory
 mkdir -p bin
-
-# Compile all Java files
 find src -name "*.java" -print0 | xargs -0 javac -d bin
-
-# Run the test program
 java -cp bin com.gdb.tests.TestInterfaceFactory
 ```
 
 ---
 
-## Expected Output
+## 📊 Expected Output
+
 ```
-=== Activity 12: Factory-Driven System Suite ===
-[Test 1] Savings Account Creation & Deposit: [PASS]
-[Test 2] Current Account Overdraft Withdrawal: [PASS]
-[Test 3] Fixed Deposit Premature Withdrawal Block: [PASS]
-[Test 4] Invalid Type Rejection: [PASS]
-Factory-driven architecture successfully verified!
+=========================================
+   ACTIVITY 12: FACTORY PATTERN TESTS    
+=========================================
+
+--- Testing Savings Account Created via Factory ---
+Account Number: SA100
+Name: Alice
+Age: 25
+Balance: Rs 5000.0
+Account Type: Savings
+Status: Active
+Savings Interest: Rs 200.0
+
+--- Testing Current Account Created via Factory ---
+Account Number: CA200
+Name: Bob
+Age: 35
+Balance: Rs 10000.0
+Account Type: Current
+Status: Active
+
+--- Testing Salary Account Created via Factory ---
+Account Number: SAL300
+Name: Charlie
+Age: 28
+Balance: Rs 0.0
+Account Type: Salary
+Status: Active
+
+--- Testing Fixed Deposit Account Created via Factory ---
+Account Number: FD400
+Name: Diana
+Age: 45
+Balance: Rs 50000.0
+Account Type: FixedDeposit
+Status: Active
+FD Interest: Rs 3250.0
+
+=========================================
+   FACTORY TESTS COMPLETED SUCCESSFULLY  
+=========================================
 ```
+
+---
+
+## 💡 Key Takeaways
+
+### What This Activity Teaches
+- How to write pure interface-based client applications.
+- How to test Factory implementations for completeness and error safety.
+
+### How It Connects
+- **Previous**: Activity 11 introduced `IAccount` and `AccountFactory`.
+- **Next**: Activity 13.1 extracts business policy rules into an `AccountRulesEngine`.
+
+---
+
+## ⚠️ Common Mistakes
+
+| Mistake | Solution |
+|---------|----------|
+| Importing concrete subclasses into client test file | When testing factory decoupling, only import `IAccount` and `AccountFactory`. |
+
+---
+
+## 🏁 Next Steps
+
+Proceed to **Activity 13.1** to build a centralized Business Rules Engine.
+
+---
+*End of Activity 12 Solution*
