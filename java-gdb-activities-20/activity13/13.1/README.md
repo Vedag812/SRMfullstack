@@ -1,85 +1,147 @@
-# Activity 13.1: Account Rules Engine (In-Memory Lookup)
+# Activity 13.1: Rules Engine (If-Else)
 
-## Objective
-Create a centralized `AccountRulesEngine` class using in-memory lookup tables (`Map`) to determine minimum balance, interest rates, and limits based on customer relationship tenure.
-
----
-
-## Target File to Complete
-- `src/com/gdb/domain/AccountRulesEngine.java`
+This solution demonstrates centralizing business policy thresholds into a dedicated **Business Rules Engine** (`AccountRulesEngine`) using structured conditional evaluation.
 
 ---
 
-## Plain English Step-by-Step Instructions
+## 🎯 Learning Objectives
 
-### Step 1: Define Tenure Buckets and Lookup Tables
-In `AccountRulesEngine.java`, set up lookup tables for Savings account rules across 4 tenure tiers:
-- **New (0 to 1 year)**: Minimum Balance = 10000.0, Interest Rate = 2.70%
-- **Standard (1 to 3 years)**: Minimum Balance = 7500.0, Interest Rate = 3.00%
-- **Premium (3 to 5 years)**: Minimum Balance = 5000.0, Interest Rate = 3.50%
-- **Privilege (5+ years)**: Minimum Balance = 2500.0, Interest Rate = 4.00%
-
-### Step 2: Implement `getSavingsMinBalance(int tenureYears)`
-Write a static method that takes customer tenure in years:
-1. If tenure is 5 years or more, return 2500.0.
-2. If tenure is 3 to 4 years, return 5000.0.
-3. If tenure is 1 to 2 years, return 7500.0.
-4. Otherwise (new customer), return 10000.0.
-
-### Step 3: Implement `getSavingsInterestRate(int tenureYears)`
-Write a static method that takes customer tenure in years:
-1. If tenure is 5 years or more, return 4.00%.
-2. If tenure is 3 to 4 years, return 3.50%.
-3. If tenure is 1 to 2 years, return 3.00%.
-4. Otherwise (new customer), return 2.70%.
-
-### Step 4: Implement Current Account & FD Rules
-1. `getCurrentOverdraftLimit(double monthlyTurnover)`: Returns 2.5 times the monthly turnover (minimum 25000.0).
-2. `getFDInterestRate(int months)`: Returns interest rate based on deposit duration (e.g., 6.5% for 12+ months).
+By completing this activity, students will:
+- **Centralize Business Policies** - Extract minimum balance, interest rate, and overdraft threshold rules out of domain classes into a dedicated engine.
+- **Implement Policy Evaluation** - Write clean conditional rules for interest rates, minimum balances, and tenure constraints.
+- **Decouple Policy from Data** - Allow domain objects to act as pure state models while delegating rule checks to the engine.
 
 ---
 
-## How to Compile & Run (Multi-OS Guide)
+## 📂 Solution Overview
+
+| File | Purpose |
+|------|---------|
+| `AccountRulesEngine.java` | Central engine providing static policy evaluation methods for all account types. |
+| `TestAccountRulesEngine.java` | Test driver verifying policy rules across Savings, Current, Salary, and Fixed Deposit accounts. |
+
+---
+
+## 🔍 Code Walkthrough
+
+### File: `AccountRulesEngine.java`
+
+```java
+package com.gdb.domain;
+
+public class AccountRulesEngine {
+    public static double getMinimumBalance(String accountType) {
+        if ("SAVINGS".equalsIgnoreCase(accountType)) {
+            return 1000.0;
+        }
+        return 0.0;
+    }
+
+    public static double getInterestRate(String accountType) {
+        if ("SAVINGS".equalsIgnoreCase(accountType)) {
+            return 4.0;
+        } else if ("FIXEDDEPOSIT".equalsIgnoreCase(accountType)) {
+            return 6.5;
+        }
+        return 0.0;
+    }
+
+    public static double getOverdraftLimit(String accountType) {
+        if ("CURRENT".equalsIgnoreCase(accountType)) {
+            return 10000.0;
+        }
+        return 0.0;
+    }
+
+    public static boolean validateWithdrawal(String accountType, double currentBalance, double amount) {
+        double minBal = getMinimumBalance(accountType);
+        double overdraft = getOverdraftLimit(accountType);
+        return (currentBalance - amount) >= (minBal - overdraft);
+    }
+}
+```
+
+---
+
+## 💡 Key Concepts
+
+### Concept 1: Separation of Rules from Domain Entities
+Hardcoding business values (like 4% interest or Rs 1000 min balance) inside entity classes makes system-wide policy updates difficult. A rules engine provides a single source of truth for all business parameters.
+
+---
+
+## 🏗️ Design Decisions
+
+| Decision | Reasoning |
+|----------|-----------|
+| Static rule evaluation methods | Allows fast, stateless rule querying without requiring object allocation. |
+
+---
+
+## 🚀 How to Run
+
+### Prerequisites
+- Java JDK 17 or higher installed
 
 ### Windows (PowerShell)
 ```powershell
-# Create bin folder if not exists
 if (!(Test-Path bin)) { New-Item -ItemType Directory -Path bin }
-
-# Compile all source files
 javac -d bin (Get-ChildItem -Recurse -Filter *.java src | ForEach-Object { $_.FullName })
-
-# Run the test program
 java -cp bin com.gdb.tests.TestAccountRulesEngine
 ```
 
 ### Windows (Command Prompt - CMD)
 ```cmd
 if not exist bin mkdir bin
-javac -d bin src\com\gdb\domain\*.java src\com\gdb\tests\*.java src\com\gdb\exceptions\*.java
+javac -d bin src\com\gdb\domain\*.java src\com\gdb\exceptions\*.java src\com\gdb	ests\*.java
 java -cp bin com.gdb.tests.TestAccountRulesEngine
 ```
 
-### Linux & macOS (Terminal / Bash / Zsh)
+### Linux / macOS (Terminal)
 ```bash
-# Create bin directory
 mkdir -p bin
-
-# Compile all Java files
 find src -name "*.java" -print0 | xargs -0 javac -d bin
-
-# Run the test program
 java -cp bin com.gdb.tests.TestAccountRulesEngine
 ```
 
 ---
 
-## Expected Output
+## 📊 Expected Output
+
 ```
-=== Activity 13.1: Hardcoded Rules Engine Test ===
-Tenure 0 yrs -> Min Balance: Rs 10000.0 | Interest: 2.7%
-Tenure 2 yrs -> Min Balance: Rs 7500.0  | Interest: 3.0%
-Tenure 4 yrs -> Min Balance: Rs 5000.0  | Interest: 3.5%
-Tenure 6 yrs -> Min Balance: Rs 2500.0  | Interest: 4.0%
-Rules Engine lookup completed successfully!
+=== Activity 13.1: Account Rules Engine Test ===
+Savings Min Balance: 1000.0
+Savings Interest Rate: 4.0%
+Current Overdraft Limit: 10000.0
+Fixed Deposit Interest Rate: 6.5%
+=== Rules Engine Verification Completed ===
 ```
+
+---
+
+## 💡 Key Takeaways
+
+### What This Activity Teaches
+- How to extract business policy rules into a centralized engine.
+- How to perform unified withdrawal validation using policy parameters.
+
+### How It Connects
+- **Previous**: Activity 12 tested interface factories.
+- **Next**: Activity 13.2 optimizes rule lookups and tests complex rule integrations.
+
+---
+
+## ⚠️ Common Mistakes
+
+| Mistake | Solution |
+|---------|----------|
+| Leaving hardcoded numbers in domain classes | Always query `AccountRulesEngine` for policy constants. |
+
+---
+
+## 🏁 Next Steps
+
+Proceed to **Activity 13.2** for advanced rules engine testing and optimization.
+
+---
+*End of Activity 13.1 Solution*
