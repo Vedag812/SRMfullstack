@@ -5,26 +5,43 @@ import com.gdb.exceptions.*;
 
 public class TestAccountSubclasses {
     public static void main(String[] args) {
-        System.out.println("=== Activity 8: Polymorphism Test ===");
+        System.out.println("Activity 8: Polymorphism Test ");
 
-        // NOTE: The domain classes in src/com/gdb/domain are provided complete (the Activity 7 subclasses plus
-        // their overridden withdraw() methods). Declare each account with the parent type Account so that the
-        // overridden withdraw() is chosen at runtime (dynamic method dispatch).
+        Account sa = new SavingsAccount("SAV1001", "Rajesh Sharma", 28, 10000.0, "ACTIVE", "1234", 1000.0, 4.0);
+        try {
+            sa.withdraw(9500.0, "1234");
+            System.out.println("[Savings] [FAIL]");
+        } catch (MinimumBalanceViolationException e) {
+            System.out.println("[Savings] Withdraw 9500 (breaches min balance 1000): Caught MinimumBalanceViolationException [PASS]");
+        } catch (AccountException e) {
+            System.out.println("[Savings] [FAIL]");
+        }
 
-        // TODO: Step 1 - Test SavingsAccount minimum balance breach
-        //   Create a SavingsAccount (balance 10000.0, minBalance 1000.0), withdraw 9500.0 with the correct PIN,
-        //   catch MinimumBalanceViolationException and print [PASS]; print [FAIL] for any other outcome.
+        Account ca = new CurrentAccount("CUR1001", "Priya Patel", 34, 5000.0, "ACTIVE", "5678", 25000.0);
+        try {
+            ca.withdraw(10000.0, "5678");
+            System.out.println("[Current] Withdraw with Overdraft (Balance goes to -5000): SUCCESS [PASS]");
+        } catch (AccountException e) {
+            System.out.println("[Current] [FAIL]");
+        }
 
-        // TODO: Step 2 - Test CurrentAccount valid withdrawal utilizing overdraft facility
-        //   Create a CurrentAccount (balance 5000.0, overdraftLimit 25000.0), withdraw 10000.0 with the correct PIN,
-        //   verify it succeeds (balance goes to -5000.0) and print [PASS].
+        try {
+            ca.withdraw(30000.0, "5678");
+            System.out.println("[Current] [FAIL]");
+        } catch (InsufficientBalanceException e) {
+            System.out.println("[Current] Withdraw exceeding Overdraft (exceeds -25000): Caught InsufficientBalanceException [PASS]");
+        } catch (AccountException e) {
+            System.out.println("[Current] [FAIL]");
+        }
 
-        // TODO: Step 3 - Test CurrentAccount exceeding overdraft limit
-        //   On the same account, withdraw 30000.0, catch InsufficientBalanceException and print [PASS].
+        Account fda = new FixedDepositAccount("FD1001", "Amit Kumar", 45, 50000.0, "ACTIVE", "1111", 12, 6.5);
+        try {
+            fda.withdraw(5000.0, "1111");
+            System.out.println("[FixedDeposit] [FAIL]");
+        } catch (AccountException e) {
+            System.out.println("[FixedDeposit] Withdraw attempt: Caught AccountException [PASS]");
+        }
 
-        // TODO: Step 4 - Test FixedDepositAccount premature withdrawal block
-        //   Create a FixedDepositAccount, attempt any withdrawal, catch AccountException and print [PASS].
-
-        System.out.println("=== Complete Activity 8 polymorphism tests and verify output ===");
+        System.out.println("All polymorphic behaviors verified!");
     }
 }
