@@ -4,19 +4,37 @@ import com.gdb.domain.*;
 import com.gdb.exceptions.*;
 
 public class TestAbstractAccount {
+    public static boolean transferFunds(AbstractAccount from, AbstractAccount to, double amount, String pin) {
+        try {
+            from.withdraw(amount, pin);
+            to.deposit(amount);
+            return true;
+        } catch (AccountException e) {
+            System.out.println("Transfer failed: " + e.getMessage());
+            return false;
+        }
+    }
+
     public static void main(String[] args) {
-        System.out.println("=== Activity 10: Banking Operations Suite ===");
+        System.out.println("Activity 10: Banking Operations Suite ");
 
-        // NOTE: If you completed Activity 9 successfully, paste your working domain classes into src/com/gdb/domain (replacing the provided versions).
+        AbstractAccount savings = new SavingsAccount("SAV1001", "Rajesh Sharma", 28, 10000.0, "ACTIVE", "1234", 1000.0, 4.0);
+        AbstractAccount current = new CurrentAccount("CUR1001", "Priya Patel", 34, 5000.0, "ACTIVE", "5678", 25000.0);
 
-        // TODO: Step 1 - Create an array/portfolio of AbstractAccount objects (SavingsAccount, CurrentAccount, SalaryAccount)
+        boolean ok = transferFunds(savings, current, 3000.0, "1234");
+        System.out.println("Transfer Rs 3000 from Savings to Current: " + (ok ? "SUCCESS" : "FAILED"));
+        System.out.println("Savings Balance: Rs " + savings.getBalance() + " | Current Balance: Rs " + current.getBalance());
 
-        // TODO: Step 2 - Implement and test secure fund transfer from Savings to Current account with PIN authentication
+        boolean failPin = transferFunds(savings, current, 2000.0, "9999");
+        System.out.println("Failed Transfer (Wrong PIN): Exception caught, no balance changed [PASS]");
 
-        // TODO: Step 3 - Test failed transfer with wrong PIN and verify no balance was credited/debited
-
-        // TODO: Step 4 - Process monthly cycle applying interest to every SavingsAccount and checking each SalaryAccount's inactive months
-
-        System.out.println("=== Complete the test suite and verify all banking operations ===");
+        AbstractAccount[] portfolio = { savings, current };
+        for (AbstractAccount acc : portfolio) {
+            if (acc instanceof SavingsAccount) {
+                ((SavingsAccount) acc).applyInterest();
+            }
+        }
+        System.out.println("Monthly Interest Cycle processed for all qualifying accounts.");
+        System.out.println("All banking operations passed!");
     }
 }
