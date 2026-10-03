@@ -1,8 +1,5 @@
 package com.gdb.domain;
 
-/**
- * Account - Basic bank account class representing fundamental account details and operations.
- */
 public class Account {
     private String accountNumber;
     private String name;

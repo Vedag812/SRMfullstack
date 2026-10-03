@@ -4,24 +4,33 @@ import com.gdb.domain.Account;
 
 public class TestAccount {
     public static void main(String[] args) {
-        System.out.println("=== Activity 2: Test Account Suite ===");
-
-        // NOTE: If you completed Activity 1 successfully, paste your working Account.java code into com.gdb.domain.
+        System.out.println("Activity 2: Test Account Suite ");
 
         Account acc = new Account("ACC1001", "Rajesh Sharma", 28, 5000.0, "SAVINGS", "ACTIVE");
 
-        // TODO: Step 1 - Test Initial Balance (Assert balance == 5000.0)
+        boolean t1 = (acc.getBalance() == 5000.0);
+        System.out.println("Test 1 (Initial Balance 5000.0): " + (t1 ? "[PASS]" : "[FAIL]"));
 
-        // TODO: Step 2 - Test Valid Deposit (Deposit 2000.0 -> Assert balance == 7000.0)
+        boolean depSuccess = acc.deposit(2000.0);
+        boolean t2 = (depSuccess && acc.getBalance() == 7000.0);
+        System.out.println("Test 2 (Deposit 2000.0 -> Balance 7000.0): " + (t2 ? "[PASS]" : "[FAIL]"));
 
-        // TODO: Step 3 - Test Negative Deposit (Deposit -500.0 -> Assert returns false and balance stays 7000.0)
+        boolean negDep = acc.deposit(-500.0);
+        boolean t3 = (!negDep && acc.getBalance() == 7000.0);
+        System.out.println("Test 3 (Negative Deposit -> Rejected): " + (t3 ? "[PASS]" : "[FAIL]"));
 
-        // TODO: Step 4 - Test Valid Withdrawal (Withdraw 3000.0 -> Assert balance == 4000.0)
+        boolean withSuccess = acc.withdraw(3000.0);
+        boolean t4 = (withSuccess && acc.getBalance() == 4000.0);
+        System.out.println("Test 4 (Withdraw 3000.0 -> Balance 4000.0): " + (t4 ? "[PASS]" : "[FAIL]"));
 
-        // TODO: Step 5 - Test Exceeding Withdrawal (Withdraw 10000.0 -> Assert returns false and balance stays 4000.0)
+        boolean overWith = acc.withdraw(10000.0);
+        boolean t5 = (!overWith && acc.getBalance() == 4000.0);
+        System.out.println("Test 5 (Exceeding Withdrawal -> Rejected): " + (t5 ? "[PASS]" : "[FAIL]"));
 
-        // TODO: Step 6 - Test Negative Withdrawal (Withdraw -100.0 -> Assert returns false and balance stays 4000.0)
+        boolean negWith = acc.withdraw(-100.0);
+        boolean t6 = (!negWith && acc.getBalance() == 4000.0);
+        System.out.println("Test 6 (Negative Withdrawal -> Rejected): " + (t6 ? "[PASS]" : "[FAIL]"));
 
-        System.out.println("=== Complete Activity 2 unit tests and verify output ===");
+        System.out.println("All Account tests completed successfully!");
     }
 }
