@@ -1,8 +1,5 @@
 package com.gdb.domain;
 
-/**
- * Account - Enhanced bank account with PIN authentication, age validation, and status transitions.
- */
 public class Account {
     private String accountNumber;
     private String name;
