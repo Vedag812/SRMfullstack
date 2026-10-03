@@ -2,9 +2,6 @@ package com.gdb.domain;
 
 import com.gdb.exceptions.*;
 
-/**
- * Account - Throws domain-specific checked exceptions for invalid banking transactions.
- */
 public class Account {
     private String accountNumber;
     private String name;
