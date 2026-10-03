@@ -4,7 +4,6 @@ public class AccountRulesEngine {
     private static AccountRulesPropertiesLoader savingsLoader =
         new AccountRulesPropertiesLoader("src/main/resources/config/rules/savings.properties");
 
-    // Bucket names are lowercase so they match the keys in savings.properties (e.g. min.balance.new).
     public static String getSavingsBucket(int tenureYears) {
         if (tenureYears >= 5) return "privilege";
         if (tenureYears >= 3) return "premium";
@@ -13,16 +12,13 @@ public class AccountRulesEngine {
     }
 
     public static double getSavingsMinBalance(int tenureYears) {
-        // TODO: Step 3 - Replace the Activity 13 in-memory map lookup: read the key
-        //   "min.balance." + getSavingsBucket(tenureYears) from savingsLoader with getDouble(...),
-        //   falling back to 10000.0 when the key is missing.
-        return 0.0;
+        String bucket = getSavingsBucket(tenureYears);
+        return savingsLoader.getDouble("min.balance." + bucket, 10000.0);
     }
 
     public static double getSavingsInterestRate(int tenureYears) {
-        // TODO: Step 3 - Read the key "interest.rate." + getSavingsBucket(tenureYears) from savingsLoader
-        //   with getDouble(...), falling back to 2.70.
-        return 0.0;
+        String bucket = getSavingsBucket(tenureYears);
+        return savingsLoader.getDouble("interest.rate." + bucket, 2.70);
     }
 
     public static double getCurrentOverdraftLimit(double monthlyTurnover) {

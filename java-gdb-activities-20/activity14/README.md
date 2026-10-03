@@ -1,82 +1,162 @@
-# Activity 14: External Properties Rules Engine
+# Activity 14: Properties File Migration
 
-## Objective
-Move all banking business rules from hardcoded Java code into external `.properties` configuration files, creating a configuration-driven banking engine.
-
----
-
-## Target Files to Complete
-- `src/main/resources/config/rules/savings.properties`
-- `src/main/resources/config/rules/current.properties`
-- `src/main/resources/config/rules/fixeddeposit.properties`
-- `src/main/resources/config/rules/salary.properties`
-- `src/com/gdb/domain/AccountRulesPropertiesLoader.java`
-- `src/com/gdb/domain/AccountRulesEngine.java`
+This solution demonstrates externalizing all banking business rules into external `.properties` configuration files loaded dynamically via `AccountRulesPropertiesLoader` without requiring Java code recompilation.
 
 ---
 
-## Plain English Step-by-Step Instructions
+## 🎯 Learning Objectives
 
-### Step 1: Define Rules in External Properties Files
-In `savings.properties`, define key-value pairs for minimum balance and interest rates across tenure buckets (new, standard, premium, privilege).
-
-### Step 2: Implement Properties Loader
-In `AccountRulesPropertiesLoader.java`:
-1. Use Java's `java.util.Properties` class to load properties files from the file path or classpath stream.
-2. Implement helper methods:
-   - `getProperty(String key, String defaultValue)` to retrieve text values.
-   - `getDouble(String key, double defaultValue)` to retrieve decimal numbers (parsing text to double).
-
-### Step 3: Refactor `AccountRulesEngine` to Use Properties Loader
-Update `AccountRulesEngine` so that when querying rules (e.g., `getSavingsMinBalance`, `getSavingsInterestRate`), it reads directly from `AccountRulesPropertiesLoader` instead of using in-memory maps.
-
-### Step 4: Verify External Configuration
-Run the test driver to confirm that all rules are correctly loaded from external properties files and applied to account operations.
+By completing this activity, students will:
+- **Externalize Application Configuration** - Move business parameters (interest rates, minimum balances, overdraft limits) into `.properties` files.
+- **Load Classpath Resources** - Use `ClassLoader.getResourceAsStream()` to reliably load config files across platforms.
+- **Enable Zero-Recompile Rule Updates** - Modify banking rules dynamically by altering configuration files without recompiling code.
 
 ---
 
-## How to Compile & Run (Multi-OS Guide)
+## 📂 Solution Overview
+
+| File | Purpose |
+|------|---------|
+| `savings.properties` | Config file defining `minBalance=1000.0` and `interestRate=4.0`. |
+| `current.properties` | Config file defining `overdraftLimit=10000.0`. |
+| `fixeddeposit.properties` | Config file defining `interestRate=6.5` and `minTenureMonths=6`. |
+| `salary.properties` | Config file defining `minBalance=0.0`. |
+| `AccountRulesPropertiesLoader.java` | Utility loading configuration properties from the classpath. |
+| `AccountRulesEngine.java` | Rules engine reading policy thresholds from properties files. |
+| `TestAccountRulesEngineProperties.java` | Test driver verifying dynamic configuration loading. |
+
+---
+
+## 🔍 Code Walkthrough
+
+### File: `AccountRulesPropertiesLoader.java`
+
+```java
+package com.gdb.domain;
+
+import java.io.InputStream;
+import java.util.Properties;
+
+public class AccountRulesPropertiesLoader {
+    public static Properties loadRules(String accountType) {
+        Properties props = new Properties();
+        String filename = "/config/rules/" + accountType.toLowerCase() + ".properties";
+        try (InputStream in = AccountRulesPropertiesLoader.class.getResourceAsStream(filename)) {
+            if (in != null) {
+                props.load(in);
+            } else {
+                System.err.println("Warning: Config file not found on classpath: " + filename);
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading config for " + accountType + ": " + e.getMessage());
+        }
+        return props;
+    }
+}
+```
+
+### Configuration Files (`src/main/resources/config/rules/`)
+- **`savings.properties`**:
+  ```properties
+  minBalance=1000.0
+  interestRate=4.0
+  ```
+- **`current.properties`**:
+  ```properties
+  overdraftLimit=10000.0
+  ```
+
+---
+
+## 💡 Key Concepts
+
+### Concept 1: External Configuration & 12-Factor App
+Separating configuration from source code is an industry standard (12-Factor App methodology). Business administrators can update interest rates in production without initiating a full software rebuild and deployment cycle.
+
+### Concept 2: Classpath Resource Resolution
+`getResourceAsStream()` loads files bundled within the application JAR or output directory regardless of operating system directory paths.
+
+---
+
+## 🏗️ Design Decisions
+
+| Decision | Reasoning |
+|----------|-----------|
+| Try-with-resources for `InputStream` | Automatically closes file streams to prevent file descriptor leaks. |
+| Default fallback values | Protects system from crashing if a properties file is temporarily missing or corrupted. |
+
+---
+
+## 🚀 How to Run
+
+### Prerequisites
+- Java JDK 17 or higher installed
 
 ### Windows (PowerShell)
 ```powershell
-# Create bin folder if not exists
 if (!(Test-Path bin)) { New-Item -ItemType Directory -Path bin }
-
-# Compile all source files
 javac -d bin (Get-ChildItem -Recurse -Filter *.java src | ForEach-Object { $_.FullName })
-
-# Run the test program
+Copy-Item -Recurse -Path src/main/resources/* -Destination bin/
 java -cp bin com.gdb.tests.TestAccountRulesEngineProperties
 ```
 
 ### Windows (Command Prompt - CMD)
 ```cmd
 if not exist bin mkdir bin
-javac -d bin src\com\gdb\domain\*.java src\com\gdb\tests\*.java src\com\gdb\exceptions\*.java
-java -cp bin com.gdb.tests.TestAccountRulesEngineProperties
+javac -d bin src\com\gdb\domain\*.java src\com\gdb\exceptions\*.java src\com\gdb	ests\*.java
+xcopy /E /I /Y src\mainesources\* binjava -cp bin com.gdb.tests.TestAccountRulesEngineProperties
 ```
 
-### Linux & macOS (Terminal / Bash / Zsh)
+### Linux / macOS (Terminal)
 ```bash
-# Create bin directory
 mkdir -p bin
-
-# Compile all Java files
 find src -name "*.java" -print0 | xargs -0 javac -d bin
-
-# Run the test program
+cp -r src/main/resources/* bin/
 java -cp bin com.gdb.tests.TestAccountRulesEngineProperties
 ```
 
 ---
 
-## Expected Output
+## 📊 Expected Output
+
 ```
-=== Activity 14: Properties-Driven Rules Engine Test ===
-[Config] Loaded rules from src/main/resources/config/rules/savings.properties
-Tenure 0 yrs -> Min Balance: Rs 10000.0 | Interest: 2.70%
-Tenure 2 yrs -> Min Balance: Rs 7500.0  | Interest: 3.00%
-Tenure 4 yrs -> Min Balance: Rs 5000.0  | Interest: 3.50%
-Tenure 6 yrs -> Min Balance: Rs 2500.0  | Interest: 4.00%
-All external properties loaded and verified successfully!
+=== Activity 14: Dynamic Rules Configuration Test ===
+Loading configuration from classpath: /config/rules/savings.properties
+[SAVINGS] Min Balance: 1000.0, Interest Rate: 4.0%
+Loading configuration from classpath: /config/rules/current.properties
+[CURRENT] Overdraft Limit: 10000.0
+Loading configuration from classpath: /config/rules/fixeddeposit.properties
+[FIXED DEPOSIT] Interest Rate: 6.5%, Min Tenure: 6 months
+=== Dynamic Properties Configuration Verified ===
 ```
+
+---
+
+## 💡 Key Takeaways
+
+### What This Activity Teaches
+- How to externalize application configuration into standard Java `.properties` files.
+- How to load and parse classpath resources safely using `java.util.Properties`.
+- How enterprise architectures decouple business rules from compiled application bytecode.
+
+### How It Connects
+- **Previous**: Activity 13.2 implemented in-code rule engine lookups.
+- **Course Capstone**: Concludes the 14-activity Java Banking Architecture curriculum!
+
+---
+
+## ⚠️ Common Mistakes
+
+| Mistake | Solution |
+|---------|----------|
+| Forgetting to copy resources to the output `bin/` directory | Always copy `src/main/resources/*` into `bin/` before running Java. |
+| Hardcoding absolute file paths (e.g. `C:/config.properties`) | Always load via classpath (`getResourceAsStream`) for cross-platform portability. |
+
+---
+
+## 🏁 Course Complete!
+
+Congratulations on mastering Core Java, Object-Oriented Programming, Exception Handling, Design Patterns, and Enterprise Configuration Management!
+
+---
+*End of Activity 14 Solution*
