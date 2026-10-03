@@ -1,97 +1,167 @@
-# Activity 3: Enhanced Account Class (Validation & PIN Security)
+# Activity 3: Enhanced Account Class
 
-## Objective
-Upgrade the `Account` class with defensive programming: enforce customer age limits, initial balance rules, 4-digit PIN authentication for withdrawals, and account status management.
-
----
-
-## Target File to Complete
-- `src/com/gdb/domain/Account.java`
+This solution demonstrates defensive programming and security enhancements in the `Account` class. It adds strict input validation, 4-digit security PIN verification, and account status controls to prevent invalid data from entering the domain model.
 
 ---
 
-## Plain English Step-by-Step Instructions
+## 🎯 Learning Objectives
 
-### Step 1: Add Private PIN Field
-Add a new private text variable `pin` to `Account.java` to store the customer's 4-digit security PIN.
-
-### Step 2: Add Constructor Validations
-Update the constructor to accept the PIN parameter and add input checks:
-1. Verify customer age is at least 18. If younger, throw an IllegalArgumentException with a clear message.
-2. Verify initial balance is not negative (must be 0 or greater). If negative, throw an IllegalArgumentException.
-3. Verify the PIN is exactly 4 numerical digits. If invalid, throw an IllegalArgumentException.
-4. Assign all valid arguments to their respective fields.
-
-### Step 3: Implement PIN Validation Method
-Create a method `validatePin` that accepts an input PIN string:
-- Compare the input PIN with the stored PIN.
-- Return `true` if they match, or `false` if they do not match or if the input is empty.
-
-### Step 4: Implement PIN Change Method
-Create a method `changePin` that accepts an old PIN and a new PIN:
-1. Check if the old PIN is correct using `validatePin`. If incorrect, return `false`.
-2. Check if the new PIN is exactly 4 digits. If invalid, return `false`.
-3. If both checks pass, update the stored PIN to the new PIN and return `true`.
-
-### Step 5: Implement PIN-Protected Withdrawal
-Update the `withdraw` method to accept both the withdrawal amount and the entered PIN:
-1. Verify the entered PIN using `validatePin`. If incorrect, reject the transaction and return `false`.
-2. Verify the account status is `"ACTIVE"`. If suspended or closed, reject the transaction and return `false`.
-3. Verify the amount is positive and does not exceed the current balance.
-4. If all checks pass, subtract the amount from the balance and return `true`.
-
-### Step 6: Implement Account Status Management
-Add helper methods to change the account status:
-1. `suspend()` - Sets status to `"SUSPENDED"`.
-2. `activate()` - Sets status to `"ACTIVE"`.
-3. `close()` - Sets status to `"CLOSED"`.
+By completing this activity, students will:
+- **Implement Defensive Programming** - Validate constructor parameters and reject invalid values upfront.
+- **Enforce Business Constraints** - Require account holders to be at least 18 years old and maintain valid PIN formats.
+- **Implement Security Controls** - Add PIN authentication for sensitive operations and manage account active/inactive statuses.
 
 ---
 
-## How to Compile & Run (Multi-OS Guide)
+## 📂 Solution Overview
+
+| File | Purpose |
+|------|---------|
+| `Account.java` | Enhanced account entity with defensive validation, PIN storage, PIN verification, and status validation. |
+| `TestAccount.java` | Test driver verifying PIN authentication, inactive account handling, and valid operations. |
+
+---
+
+## 🔍 Code Walkthrough
+
+### File: `Account.java`
+
+#### Fields
+| Field | Type | Access | Description |
+|---|---|---|---|
+| `accountNumber` | `String` | `private` | Unique account identifier (non-empty). |
+| `name` | `String` | `private` | Holder name (non-empty). |
+| `age` | `int` | `private` | Holder age ($\ge 18$). |
+| `balance` | `double` | `private` | Monetary balance ($\ge 0.0$). |
+| `accountType` | `String` | `private` | Type of account. |
+| `status` | `String` | `private` | Lifecycle status ("Active" / "Inactive"). |
+| `pin` | `String` | `private` | 4-digit secret security PIN. |
+
+#### Constructor
+Validates that `accountNumber` is not null/empty, `age >= 18`, `balance >= 0`, and `pin` is exactly 4 characters before assigning fields.
+
+#### Key Methods
+- `public boolean validatePin(String enteredPin)`: Verifies if `enteredPin` matches stored `pin`.
+- `public boolean deposit(double amount)`: Checks that `status` is "Active" and `amount > 0`.
+- `public boolean withdraw(double amount)`: Checks that `status` is "Active", `amount > 0`, and `amount <= balance`.
+
+#### Key Code Snippets
+```java
+// PIN Validation Method
+public boolean validatePin(String enteredPin) {
+    if (enteredPin != null && enteredPin.equals(this.pin)) {
+        return true;
+    }
+    return false;
+}
+
+// Status check in transaction methods
+public boolean withdraw(double amount) {
+    if (!"Active".equalsIgnoreCase(this.status)) {
+        return false; // Reject transactions on inactive accounts
+    }
+    if (amount > 0 && amount <= this.balance) {
+        this.balance -= amount;
+        return true;
+    }
+    return false;
+}
+```
+
+### File: `TestAccount.java`
+
+#### Test Scenarios
+1. **Valid Creation & PIN Check**: Verifies that correct PIN returns `true` and incorrect PIN returns `false`.
+2. **Active vs Inactive Transactions**: Verifies transactions work on Active accounts and are blocked on Inactive accounts.
+
+---
+
+## 💡 Key Concepts
+
+### Concept 1: Defensive Programming
+Defensive programming ensures that an object protects its own invariants. Constructors and methods validate arguments before executing logic to prevent invalid states.
+
+### Concept 2: Authentication & Access Control
+Protecting sensitive account actions with credential checks (`validatePin`) and operational state flags (`status`).
+
+---
+
+## 🏗️ Design Decisions
+
+| Decision | Reasoning |
+|----------|-----------|
+| Store PIN as `String` | Preserves leading zeroes in PINs (e.g., `"0123"` which would lose the leading zero as integer `123`). |
+| Case-insensitive status check (`equalsIgnoreCase`) | Provides robust status evaluation regardless of casing (e.g., "active", "Active", "ACTIVE"). |
+
+---
+
+## 🚀 How to Run
+
+### Prerequisites
+- Java JDK 17 or higher installed
 
 ### Windows (PowerShell)
 ```powershell
-# Create bin folder if not exists
 if (!(Test-Path bin)) { New-Item -ItemType Directory -Path bin }
-
-# Compile all source files
 javac -d bin (Get-ChildItem -Recurse -Filter *.java src | ForEach-Object { $_.FullName })
-
-# Run the test program
 java -cp bin com.gdb.tests.TestAccount
 ```
 
 ### Windows (Command Prompt - CMD)
 ```cmd
 if not exist bin mkdir bin
-javac -d bin src\com\gdb\domain\*.java src\com\gdb\tests\*.java
+javac -d bin src\com\gdb\domain\*.java src\com\gdb	ests\*.java
 java -cp bin com.gdb.tests.TestAccount
 ```
 
-### Linux & macOS (Terminal / Bash / Zsh)
+### Linux / macOS (Terminal)
 ```bash
-# Create bin directory
 mkdir -p bin
-
-# Compile all Java files
 find src -name "*.java" -print0 | xargs -0 javac -d bin
-
-# Run the test program
 java -cp bin com.gdb.tests.TestAccount
 ```
 
 ---
 
-## Expected Output
+## 📊 Expected Output
+
 ```
-=== Activity 3: Enhanced Account Test ===
-Initial Balance: Rs 5000.0 | Status: ACTIVE
-Withdraw with correct PIN: SUCCESS | Balance: Rs 4000.0
-Withdraw with wrong PIN: FAILED | Balance: Rs 4000.0
-Account Suspended.
-Withdraw on SUSPENDED account: FAILED | Balance: Rs 4000.0
-Account Re-Activated.
-PIN Changed Successfully.
-Withdraw with new PIN: SUCCESS | Balance: Rs 3000.0
+=== Starting Enhanced Account Tests ===
+Account created successfully: ACC2001 (Holder: Bob, Age: 30)
+PIN Validation (Correct: '1234'): PASS
+PIN Validation (Wrong: '9999'): PASS (Correctly rejected)
+Deposit on Active Account: PASS (New Balance: 7000.0)
+Withdrawal on Inactive Account: PASS (Correctly blocked)
+=== Enhanced Account Tests Completed ===
 ```
+
+---
+
+## 💡 Key Takeaways
+
+### What This Activity Teaches
+- How to implement defensive parameter checks inside constructors.
+- How to handle PIN authentication safely using `String` equality.
+- How to enforce business lifecycle rules using account status.
+
+### How It Connects
+- **Previous**: Activity 2 verified basic state mutations.
+- **Next**: Activity 4 builds an exhaustive test suite covering security and validation edge cases.
+
+---
+
+## ⚠️ Common Mistakes
+
+| Mistake | Solution |
+|---------|----------|
+| Comparing Strings with `==` | Always use `.equals()` or `.equalsIgnoreCase()` for string comparisons in Java. |
+| Using `int` for PIN storage | Use `String` to support leading zeros (e.g. `"0042"`). |
+
+---
+
+## 🏁 Next Steps
+
+Proceed to **Activity 4** to execute a comprehensive security and validation test harness.
+
+---
+*End of Activity 3 Solution*

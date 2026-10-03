@@ -4,7 +4,7 @@ import com.gdb.domain.Account;
 
 public class TestAccount {
     public static void main(String[] args) {
-        System.out.println("=== Activity 3: Enhanced Account Test ===");
+        System.out.println("Activity 3: Enhanced Account Test ");
         Account acc = new Account("ACC1001", "Rajesh Sharma", 28, 5000.0, "SAVINGS", "ACTIVE", "1234");
         System.out.println("Initial Balance: Rs " + acc.getBalance() + " | Status: " + acc.getStatus());
 
